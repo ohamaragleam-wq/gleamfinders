@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gleam Finders</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#F2F6F3;--card:#fff;--ink:#14231B;--mute:#5B6B62;--line:#D5DFD8;--g:#0F5B3E;--gl:#DCEFE4;--warn:#C2410C;--wl:#FDE7DA;--on:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1713;--card:#16241D;--ink:#E8F1EC;--mute:#97A89E;--line:#2A3D33;--g:#4DBB8A;--gl:#1C3A2B;--warn:#FB923C;--wl:#3A2416;--on:#06140D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1713;--card:#16241D;--ink:#E8F1EC;--mute:#97A89E;--line:#2A3D33;--g:#4DBB8A;--gl:#1C3A2B;--warn:#FB923C;--wl:#3A2416;--on:#06140D;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:600px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:30px;line-height:1.1;font-weight:800;margin:8px 0 6px}
+.sub{color:var(--mute);margin:0 0 16px}
+.note{background:var(--wl);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:16px}
+.f{display:grid;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:18px}
+label{font-size:14px;color:var(--mute);display:grid;gap:4px}
+select,input[type=number]{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--g);outline-offset:2px}
+.chk{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:15px}
+.chk input{width:20px;height:20px;accent-color:var(--g);flex:none}
+details{font-size:14px;color:var(--mute)}
+summary{cursor:pointer}
+.rates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.count{font-weight:600;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--g);border-radius:10px;padding:14px;margin-bottom:14px}
+.card h2{font-size:19px;margin:0 0 6px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tag{font-size:12px;font-weight:600;background:var(--gl);color:var(--g);border-radius:20px;padding:2px 10px}
+.tag.w{background:var(--wl);color:var(--warn)}
+dl{margin:0;display:grid;gap:8px}
+dt{font-size:13px;color:var(--mute)}
+dd{margin:0;font-size:15px}
+.big{font-weight:800;font-size:20px;color:var(--g)}
+.card a{display:inline-block;margin-top:10px;color:var(--g);font-weight:600}
+.empty{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--mute)}
+</style>
+</head>
+<body>
+<main>
+<h1>Gleam Finders</h1>
+<p class="sub">Choose where you want to study and what funding you need. See the rules that decide whether you can apply.</p>
+<div class="note">These are typical rules gathered from official and news sources, not live data. Living costs are rough estimates. Deadlines, amounts and eligibility change every year, so confirm everything on the official site before you apply.</div>
+<div class="f">
+<label>Where do you want to study?<select id="r"><option value="">Anywhere</option><option>UK</option><option>Europe</option><option>Asia</option><option>Australia &amp; NZ</option><option>North America</option><option>Nigeria</option></select></label>
+<label>What funding do you need?<select id="fu"><option value="">Any funding</option><option value="full">Fully funded</option><option value="partial">Partly funded</option><option value="low">Low or no tuition</option></select></label>
+<label>Your CGPA (out of 5.0, optional)<input id="cg" type="number" step="0.01" min="0" max="5" inputmode="decimal" placeholder="e.g. 3.69"></label>
+<label class="chk"><input type="checkbox" id="ne">Only programmes with no work-experience rule</label>
+<label class="chk"><input type="checkbox" id="aw">Only programmes that may accept me before final results</label>
+<details><summary>Exchange rates to naira (edit to today’s rate)</summary>
+<div class="rates"><label>USD<input id="USD" type="number" inputmode="numeric"></label><label>EUR<input id="EUR" type="number" inputmode="numeric"></label><label>GBP<input id="GBP" type="number" inputmode="numeric"></label></div></details>
+</div>
+<p class="count" id="ct"></p>
+<div id="out"></div>
+</main>
+<script>
+const S=[
+{n:"Chevening Scholarship",r:"UK",f:"full",nig:1,exp:"2 years of work experience required (about 2,800 hours). Internships and volunteering can count: read the rules.",aw:"Check the rules: you need a degree that qualifies you for the UK course.",g:"UK 2:1 equivalent",mc:3.5,d:["CV","Essays on leadership, networking and study plans","2 references","Degree certificate and transcript","Admission to 3 UK courses"],fd:"None: tuition, travel and monthly allowance are covered.",w:"Scholarship terms restrict paid work.",l:[1300,"GBP"],dl:"The 2027/28 round closed in October 2026. The next round usually opens around August 2027.",u:"https://www.chevening.org"},
+{n:"Commonwealth Master’s Scholarship (CSC)",r:"UK",f:"full",nig:1,exp:"None",aw:"Check the rules: you apply with a degree completed or nearly complete.",g:"UK 2:1 equivalent",mc:3.5,d:["Online application","Transcripts and certificates","2 references","Study plan and development-impact statement","CV"],fd:"None: fully funded.",w:"Not intended as a work route.",l:[1300,"GBP"],dl:"Usually closes between October and December. Nigeria is on the eligible list for 2027/28: check the portal for the current call.",u:"https://cscuk.fcdo.gov.uk"},
+{n:"Erasmus Mundus Joint Master’s",r:"Europe",f:"full",nig:1,exp:"None for most courses",aw:"Often yes: many courses accept final-year students, and the certificate is due before enrolment.",g:"Set by each course. Many want a strong second-class upper or better.",d:["CV","Motivation letter","Transcripts","2 references","English test (IELTS or TOEFL)","Passport"],fd:"Scholarship covers tuition and a monthly allowance. Check the visa rules of each host country.",w:"Depends on the host country.",l:[1000,"EUR"],dl:"Mostly December to February, and it differs per course. You apply to each course directly.",u:"https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters"},
+{n:"Stipendium Hungaricum (Hungary)",r:"Europe",f:"full",nig:1,exp:"None",aw:"Often yes: proof of expected graduation has been accepted. Confirm for this year.",g:"Bachelor’s degree. Each university sets its own minimum.",d:["Online application","Motivation letter","Transcripts","Language proof","Medical certificate","References"],fd:"None: tuition, housing and monthly stipend are covered.",w:"Part-time work is allowed within limits.",l:[550,"EUR"],dl:"Usually mid-January.",u:"https://studyinhungary.hu"},
+{n:"Türkiye Scholarships (Türkiye Bursları)",r:"Europe",f:"full",nig:1,exp:"None",aw:"Final-year students can apply with expected graduation: confirm.",g:"About 75% for master’s. Confirm how Nigerian grades convert.",d:["Passport","Transcript","Certificate or expected-graduation letter","References","Statement of purpose"],fd:"None: tuition, housing and monthly stipend are covered.",w:"Not intended as a work route.",l:[400,"USD"],dl:"Usually January or February.",u:"https://turkiyeburslari.gov.tr"},
+{n:"Chinese Government Scholarship",r:"Asia",f:"full",nig:1,exp:"None",aw:"Often yes: apply with proof of expected graduation.",g:"Bachelor’s degree, plus an age limit (often under 35 for master’s).",d:["Study plan","2 recommendations","Transcripts","Medical form","Passport","Admission letter (some routes)"],fd:"None: tuition, housing and monthly stipend are covered.",w:"Generally not allowed on this scholarship.",l:[450,"USD"],dl:"Usually January to April.",u:"https://www.campuschina.org"},
+{n:"Germany: public universities and DAAD",r:"Europe",f:"low",nig:1,exp:"None for most master’s. DAAD scholarships for Nigerians often need 2 years.",aw:"Sometimes: some universities give conditional admission, and the final certificate is needed to enrol.",g:"Strong grades. Each university sets its minimum.",d:["Certified transcripts and certificate","CV","Motivation letter","IELTS or TOEFL (or German)","Passport","University evaluation (uni-assist) if required"],fd:"Blocked account of about €11,900 for the year. Check the current amount.",w:"140 full days or 280 half days a year.",l:[950,"EUR"],dl:"Winter intake often closes by mid-July (some earlier). Summer intake by mid-January.",nt:"Most public universities charge no tuition. Baden-Württemberg charges non-EU students.",u:"https://www.daad.de/en"},
+{n:"Sciences Po (France)",r:"Europe",f:"partial",nig:1,exp:"None",aw:"Check: apply with your expected degree.",g:"Strong academic record.",d:["CV","Motivation essay","Transcripts","References","Language proof"],fd:"About €615 a month is shown for the French visa. Check the current figure.",w:"Up to 964 hours a year.",l:[1200,"EUR"],dl:"Usually December to February.",nt:"Partial funding only. Tuition is high without an award.",u:"https://www.sciencespo.fr/en"},
+{n:"Holland Scholarship (Netherlands)",r:"Europe",f:"partial",nig:0,exp:"None",aw:"No: you need an admission offer first.",g:"Set by your university.",d:["Admission offer","Transcripts","Motivation letter","IELTS or TOEFL","Passport"],fd:"You must show you can cover living costs (about €1,000 or more a month).",w:"16 hours a week, or full-time in June to August.",l:[1150,"EUR"],dl:"Usually February 1.",nt:"One-off €5,000 only. Confirm Nigeria is on this year’s eligible list.",u:"https://www.studyinnl.org"},
+{n:"PTDF Overseas Scholarship (Nigerian government)",r:"Europe",f:"full",nig:1,exp:"None stated",aw:"Check the guidelines: you need your degree and a place at a partner university.",g:"Check the guidelines. The in-country scheme asks for at least a 2:2.",d:["WAEC or NECO results with PIN","Statement of purpose (max 500 words)","Local Government identification letter","Passport photo","Admission to a partner university"],fd:"None: tuition, flights and living costs are covered.",w:"Not stated.",l:[1300,"GBP"],dl:"The 2026 call closed 27 February. The 2027 call is expected in January with a late-February deadline (not yet confirmed).",nt:"Courses must serve the oil and gas sector at partner universities in the UK, Germany, France or Malaysia. Energy or petroleum law may count: confirm the course is approved.",u:"https://scholarship.ptdf.gov.ng"},
+{n:"PTDF In-Country Scholarship (study in Nigeria)",r:"Nigeria",f:"full",nig:1,exp:"None",aw:"No: you need a full-time admission letter into a Nigerian public university.",g:"At least a 2:2 first degree. Courses must be oil and gas or management related.",d:["Admission letter","First-degree certificate and transcript","O-level results","Passport photo"],fd:"None: fully funded.",w:"Check the award letter.",l:[0,"USD"],dl:"The 2026/27 window ran 27 April to 5 June 2026 and has closed. Watch the portal for the next call.",u:"https://scholarship.ptdf.gov.ng"},
+{n:"Mastercard Foundation Scholars Program",r:"Nigeria",f:"full",nig:1,exp:"None",aw:"Check each partner’s rules.",g:"Strong academic record. Each partner sets its own bar.",d:["Application form","Transcripts","Essays","References"],fd:"None: tuition, housing and books are covered.",w:"Check each partner.",l:[0,"USD"],dl:"Each partner sets its own deadline. Pan-Atlantic University’s 2026 round closed 22 May 2026.",nt:"Partners include Pan-Atlantic University in Lagos, plus universities such as Edinburgh, McGill and Cape Town. Aimed at young Africans.",u:"https://mastercardfdn.org"},
+{n:"UK university awards for Nigerians (Sussex, Royal Holloway, Northumbria, Exeter)",r:"UK",f:"partial",nig:1,exp:"None",aw:"No: you need an offer or application to the course first.",g:"Set by each university.",d:["Course application","Transcripts and certificate","Passport","English test if required"],fd:"Tuition discount only. Show funds for living costs.",w:"Usually up to 20 hours a week in term time on a UK student visa.",l:[1300,"GBP"],dl:"Sussex (£4,000): 31 Dec 2026 per one source and 31 Jan 2027 per another, so confirm. Royal Holloway (£6,000) and Northumbria (£6,000): see each site. Exeter (£10,000): 31 Aug 2027.",nt:"These are tuition-fee discounts, not full funding.",u:"https://www.sussex.ac.uk"},
+{n:"GREAT Scholarships (British Council and UK universities)",r:"UK",f:"partial",nig:1,exp:"None",aw:"No: you need a course offer or application first.",g:"Set by each university.",d:["Course application","Transcripts and certificate","Personal statement","Passport"],fd:"Tuition award only. Show funds for living costs.",w:"Usually up to 20 hours a week in term time.",l:[1300,"GBP"],dl:"Each university sets its own date. Southampton (£10,000) and Manchester (£19,000) offered awards for September 2027 entry.",nt:"Usually one award per university for a Nigerian student, so it is competitive.",u:"https://study-uk.britishcouncil.org"},
+{n:"Australia Awards Scholarships",r:"Australia & NZ",f:"full",nig:1,exp:"Check: leadership and work or community experience carry weight.",aw:"Check the round rules.",g:"Strong academic record.",d:["Online application","Transcripts and certificate","References","Leadership and community statements","Passport"],fd:"None: tuition, stipend, health cover and flights are covered.",w:"Check the award rules.",l:[1300,"USD"],dl:"Usually February to April. The 2025 round closed 30 April 2024.",u:"https://www.australiaawards.gov.au"},
+{n:"Australian university research scholarships (RTP)",r:"Australia & NZ",f:"full",nig:1,exp:"None",aw:"Check each university.",g:"Strong grades and research ability.",d:["Research proposal","Transcripts","References","English test"],fd:"None: tuition and living allowance are covered.",w:"Check each university.",l:[1300,"USD"],dl:"Each university sets its own date. Sydney’s rounds for 2027 closed on 11 Sep and 18 Dec 2026.",nt:"For research master’s and PhD, not taught master’s. You need a research topic.",u:"https://www.studyaustralia.gov.au"},
+{n:"Manaaki New Zealand Scholarships",r:"Australia & NZ",f:"full",nig:0,exp:"None",aw:"Check the rules.",g:"Strong academic record.",d:["Application form","Transcripts","References","English test"],fd:"None: tuition, living stipend, establishment allowance and flights are covered.",w:"Check the rules.",l:[1000,"USD"],dl:"Usually mid-February to March.",nt:"Confirm Nigeria is on this year’s eligible country list.",u:"https://www.nzscholarships.govt.nz"},
+{n:"MEXT Scholarship (Japan)",r:"Asia",f:"full",nig:1,exp:"None",aw:"Check: final-year students can often apply with an expected-graduation letter.",g:"Strong grades. Check the age limit (often under 35).",d:["Application form","Transcripts and certificate","Research plan","Recommendation","Medical certificate","Passport"],fd:"None: tuition, monthly stipend and flights are covered, plus up to a year of Japanese.",w:"Check the rules.",l:[900,"USD"],dl:"Embassy route: April to June. University route: December to February.",nt:"The university route is often less competitive than the embassy route.",u:"https://www.studyinjapan.go.jp/en/planning/scholarships/mext-scholarships/"},
+{n:"Global Korea Scholarship (GKS)",r:"Asia",f:"full",nig:0,exp:"None",aw:"Check the call.",g:"Strong grades. Check the age limit.",d:["Application form","Study plan","Transcripts and certificate","2 recommendations","Passport"],fd:"None: tuition, monthly stipend (KRW 1,000,000 to 1,500,000), flights, insurance and a year of Korean.",w:"Check the rules.",l:[900,"USD"],dl:"University route: usually February to March. Embassy route: earlier in the year.",nt:"Confirm Nigeria’s embassy quota this year.",u:"https://www.studyinkorea.go.kr"},
+{n:"Eiffel Excellence Scholarship (France)",r:"Europe",f:"full",nig:0,exp:"None",aw:"No: a French university must nominate you, so you apply there first.",g:"Top academic record.",d:["Application to a French university","Transcripts","CV and motivation letter","Passport"],fd:"None: monthly allowance, travel and insurance are covered.",w:"Check the rules.",l:[1100,"EUR"],dl:"Universities nominate between October and December. The final Campus France deadline is in January.",nt:"Confirm Nigeria is eligible this year.",u:"https://www.campusfrance.org/en/eiffel-scholarship-program-of-excellence"},
+{n:"DAAD Helmut-Schmidt Programme (Germany)",r:"Europe",f:"full",nig:1,exp:"Work experience required (usually 2 years)",aw:"Check: you need a first degree with proof of results.",g:"Strong first degree.",d:["CV","Motivation letter","Transcripts and certificate","Proof of work experience","2 references","English test"],fd:"None: monthly stipend, insurance and travel are covered.",w:"Check the rules.",l:[1000,"EUR"],dl:"The 2026 round closed 31 July. Rounds run yearly in June and July.",nt:"Master’s in public policy and good governance.",u:"https://www.daad.de/en/study-and-research-in-germany/scholarships/helmut-schmidt-programme/"},
+{n:"Fulbright Foreign Student Program (USA)",r:"North America",f:"full",nig:1,exp:"Check: leadership and work experience help.",aw:"Check the call.",g:"Strong academic record.",d:["Application form","Transcripts","Study objectives","References","English test","Passport"],fd:"Usually tuition, stipend and flights. Confirm for your year.",w:"Strictly limited on a J-1 visa.",l:[1500,"USD"],dl:"Check the Fulbright site and the US Embassy in Nigeria for this year’s call.",u:"https://foreign.fulbrightonline.org"}
+];
+const R={USD:1500,EUR:1750,GBP:2000};
+try{Object.assign(R,JSON.parse(localStorage.getItem("rt")||"{}"))}catch(e){}
+for(const k in R){const i=document.getElementById(k);i.value=R[k];i.oninput=()=>{R[k]=+i.value||0;try{localStorage.setItem("rt",JSON.stringify(R))}catch(e){}go()}}
+const FL={full:"Fully funded",partial:"Partly funded",low:"Low or no tuition"};
+function go(){
+const r=rg.value,f=fu.value,c=parseFloat(cg.value),ne=document.getElementById("ne").checked,aw=document.getElementById("aw").checked;
+const L=S.filter(s=>(!r||s.r===r)&&(!f||s.f===f)&&(!ne||s.exp.startsWith("None"))&&(!aw||/^(Often|Sometimes|Check|Final)/.test(s.aw)));
+document.getElementById("ct").textContent=L.length?L.length+(L.length===1?" programme found":" programmes found"):"";
+document.getElementById("out").innerHTML=L.length?L.map(s=>{
+const n=Math.round(s.l[0]*R[s.l[1]]/1000)*1000;
+const gr=(!isNaN(c)&&s.mc)?(c>=s.mc?'<span class="tag">Your CGPA fits the usual grade</span>':'<span class="tag w">Your CGPA is below the usual grade</span>'):"";
+return `<article class="card"><h2>${s.n}</h2><div class="tags"><span class="tag">${FL[s.f]}</span><span class="tag ${s.nig?"":"w"}">${s.nig?"Open to Nigerians":"Check Nigeria is eligible"}</span>${gr}</div><dl>
+<div><dt>Living cost per month</dt><dd>${s.l[0]?`<span class="big">₦${n.toLocaleString("en-NG")}</span> (about ${s.l[0].toLocaleString()} ${s.l[1]})`:"Covered by the scholarship or paid in naira. Check the award letter."}</dd></div>
+<div><dt>Grade needed</dt><dd>${s.g}</dd></div>
+<div><dt>Work experience</dt><dd>${s.exp}</dd></div>
+<div><dt>Before your final results are out</dt><dd>${s.aw}</dd></div>
+<div><dt>Documents</dt><dd>${s.d.join(", ")}</dd></div>
+<div><dt>Proof of funds</dt><dd>${s.fd}</dd></div>
+<div><dt>Work while studying</dt><dd>${s.w}</dd></div>
+<div><dt>Deadline</dt><dd>${s.dl}</dd></div>
+${s.nt?`<div><dt>Note</dt><dd>${s.nt}</dd></div>`:""}</dl>
+<a href="${s.u}" target="_blank" rel="noopener">Open the official site</a></article>`}).join(""):'<div class="empty">Nothing matches. Try a different region or funding type, or turn off a filter.</div>'}
+const rg=document.getElementById("r"),fu=document.getElementById("fu"),cg=document.getElementById("cg");
+["r","fu","cg","ne","aw"].forEach(i=>document.getElementById(i).addEventListener("input",go));
+go();
+</script>
+</body>
+</html>
